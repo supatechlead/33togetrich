@@ -1,12 +1,10 @@
-baseURL = "devopsjaz.netlify.app"
-title = "devopsjaz"
-theme= "hugo-coder"
-languageCode = "en"
-defaultContentLanguage = "en"
-paginate = 6
-enableEmoji = true
-# Enable Disqus comments
-# disqusShortname = "yourdiscussshortname"
+baseurl = "http://www.example.com"
+title = "johndoe"
+theme = "hugo-coder"
+languagecode = "en"
+defaultcontentlanguage = "en"
+
+paginate = 20
 
 [markup.highlight]
 noClasses = false
