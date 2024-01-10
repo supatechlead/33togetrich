@@ -1,4 +1,4 @@
-baseurl = "devopsjaz.netlify.app"
+baseurl = "https://devopsjaz.netlify.app"
 title = "devopsjaz"
 theme = "hugo-coder"
 languagecode = "en"
