@@ -1,6 +1,6 @@
 +++ 
 draft = false
-date = 2024-01-11T14:37:18+01:00
+date = 2024-01-12T14:37:18+01:00
 title = "MySQL in Docker"
 description = "Start using MySQL inside a Docker Container"
 slug = ""
