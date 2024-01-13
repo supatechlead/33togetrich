@@ -5,7 +5,7 @@ title = "MySQL in Docker"
 description = "Start using MySQL inside a Docker Container"
 slug = ""
 authors = []
-tags = ["Docker", "React", "Nginx"]
+tags = ["Docker", "MySQL"]
 categories = []
 externalLink = ""
 series = []
@@ -97,4 +97,5 @@ GRANT ALL PRIVILEGES ON *.* TO 'dbeaver'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 ```
 Finally, you are ready to connect with some database client. I have chosen for DBeaver. In the next picture, you can see the configuration. 
+
 ![DBeaver Configuration](/images/20240112_dbeaver_mysql.webp)
