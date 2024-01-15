@@ -1,147 +1,205 @@
 +++ 
 draft = false
 date = 2024-01-15T14:37:18+01:00
-title = "MySQL in Docker in More Advanded Ways"
-description = "More Advanced MySQL inside a Docker Container"
+title = "NodeJS Express backend inside Docker"
+description = "Dockerize NodeJS Backend Server with React Frontend"
 slug = ""
 authors = []
-tags = ["Docker", "MySQL"]
+tags = ["Docker", "React", "Node", "Express"]
 categories = []
 externalLink = ""
 series = []
 tableOfContents = true
 +++
 
-Docker is among the more popular platforms for developing and deploying containerized applications. This article explains how to Dockerize MySQL for isolated database environments. 
+In this tutorial we will learn how to create and run a NodeJS Express backend and a React frontend inside of a Docker container.
 
-## Starting Your MySQL Container
+## Project Creation
 
-First identify the image tag you should use. MySQL versions 5.6, 5.7, and 8.0 are available.
+Before you begin make sure that you have Docker installed and running on your computer.
 
-Starting a MySQL container for the first time will automatically create an initial `root` user. You need to either supply a password for this user or ask MySQL to generate one. Here's an example of running a basic MySQL container with a specified `root` password:
+Now use the command line to navigate to a directory like your desktop then run the commands below.
+
 ```bash
-docker run --name mysql -d \
-    -p 3306:3306 \
-    -e MYSQL_ROOT_PASSWORD=change-me \
-    --restart unless-stopped \
-    mysql:8
+mkdir my-app-docker
+cd my-app-docker
+touch docker-compose.yml
+mkdir api
+cd api
+npm init -y
+npm i express
+touch app.js Dockerfile .dockerignore
+cd ..
+```
+We setup a backend called api and created some Docker file.
+
+## Backend Part
+
+Put this in the `docker-compose.yml` file. Be careful with the yaml formatting otherwise you will get Docker errors when you try to run it.
+```yaml
+version: '3.8'
+services:
+  api:
+    build: ./api
+    container_name: api_backend
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./api:/app
+      - ./app/node_modules
 ```
 
-* This command starts a container with MySQL 8. 
-* The password for the `root` user is set manually. 
-* The `-d` flag means the container will run in the background until it's stopped, independently of your terminal session. 
-* The `--restart` parameter instructs Docker to always restart the container. This means your MySQL database will run without intervention after host machine reboots or Docker daemon updates. 
-* The `unless-stopped` policy used here won't start the container if you manually stopped it with docker stop.
-* Docker's `-p` flag enables port forwarding into the container so you'll be able to access your database on `localhost:3306`. This is the default MySQL port; this example forwards port 3306 on your host to the same port inside the container.
+Add this is the app.js file.
+```javascript
+const express = require('express');
 
-You can view the container's startup logs with `docker logs mysql --follow`. When "`ready for connections`" appears, your MySQL database is accessible.
+const app = express();
 
-## Container Access
+const port = process.env.PORT || 4000;
 
-Without port forwarding enabled, you'd only be able to access your database from within the container. You can do this at any time by using `docker exec` to get a shell inside the container:
-```bash
-docker exec -it mysql mysql -p
-```
-This command runs `mysql -p` inside the mysql container. The `-it` flags mean your terminal's input stream will be forwarded to the container as an interactive TTY.
+app.get('/', (req, res) => {
+  res.send('Home Route');
+});
 
-### Persisting Data With Volumes
-
-While the container created above is a fully functioning MySQL server, you need to set up volumes so your data isn't lost when the container stops. 
-
-The MySQL Docker image is configured to store all its data in the `/var/lib/mysql` directory. Mounting a volume to this directory will enable persistent data storage that outlives any single container instance.
-
-Stop and remove your earlier container to avoid naming conflicts:
-```bash
-docker stop mysql
-docker rm mysql
+app.listen(port, () =>
+  console.log(`Server running on port ${port}, http://localhost:${port}`)
+);
 ```
 
-Then start a new container with the revised configuration:
+Now add this line to the `.dockerignore` file.
 ```bash
-docker run --name mysql -d \
-    -p 3306:3306 \
-    -e MYSQL_ROOT_PASSWORD=change-me \
-    -v mysql:/var/lib/mysql \
-    mysql:8
-```
-Using this command to start your MySQL container will create a new Docker volume called mysql. It'll be mounted into the container at `/var/lib/mysql`, where MySQL stores its data files. Any data written to this directory will now be transparently stored in the Docker-managed volume on your host.
-
-## Using Container Networks
-
-In the examples above, port forwarding was used to expose the MySQL server on your host's network. If you'll only be connecting to MySQL from within another Docker container, such as your API server, a better approach is to create a dedicated Docker network. This improves security by limiting your database's exposure.
-
-First create a Docker network for your application:
-```bash
-docker network create example-app
-```
-Specify this network when starting your MySQL container:
-```bash
-docker run --name mysql -d \
-    -e MYSQL_ROOT_PASSWORD=change-me \
-    -v mysql:/var/lib/mysql \
-    --network example-app \
-    mysql:8
+node_modules
 ```
 
-Connect another container to the same network:
+Next add this code to the `Dockerfile` file.
 ```bash
-docker run --name api-server -d \
-    -p 80:80 \
-    --network example-app \
-    example-api-server:latest
-```
-Your API and MySQL containers now share a network. You can connect to MySQL from your API container by referencing the MySQL container's hostname. This matches the container's name by default. Here your application should connect to port 3306 on the mysql host.
+FROM node:16-alpine
 
-## MySQL Configuration
-The official MySQL image supports several environment variables that you can use to configure your container's initial state. You've already seen one, `MYSQL_ROOT_PASSWORD`. Use the `-e` flag with `docker run` to set each of these variables. They're only respected the first time the container starts, when the MySQL data directory is empty.
-* `MYSQL_DATABASE` - The name of a database schema to be created when the container starts.
-* `MYSQL_USER` and `MYSQL_PASSWORD` - Create a new ordinary user when the container starts.
-* `MYSQL_RANDOM_ROOT_PASSWORD` - Set this instead of `MYSQL_ROOT_PASSWORD` if you'd like MySQL to generate a secure root password for you. If you enable this setting, the password will be emitted to the container(s logs (accessible via the `docker logs` command) during the first start. It will not be possible to retrieve the password afterward.
-* `MYSQL_ALLOW_EMPTY_PASSWORD` - Setting this will create the `root` user with an empty password. Only use this option for throwaway database instances. It is insecure and would let anyone connect to MySQL with superuser privileges.
+WORKDIR /app
 
-Using these environment variables means their values will be visible to anyone able to `docker inspect` your container. A more secure approach is to use Docker secrets or volumes to inject values as files.
+COPY package.json .
 
-The MySQL image supports an additional variant of each of the above variables. Suffix a variable's name with `_FILE` to have its value interpreted as a path to a file containing the real value. This example securely sets the root user's password in a way that can't be inspected from outside the container:
-```bash
-mkdir secrets
-echo "P@$$w0rd" > secrets/mysql-root-password
+RUN npm install
 
-docker run --name mysql -d \
-    -p 3306:3306 \
-    -e MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql-root-password \
-    -v ./secrets:/run/secrets \
-    --restart unless-stopped \
-    mysql:8
-```
-The password is written to a file that's mounted into the container using a Docker volume. MySQL instructs that the password be sourced from that mounted file by way of the `MYSQL_ROOT_PASSWORD_FILE` environment variable. Anyone viewing the container's environment variables will see the file path instead of the plain text password.
+COPY . .
 
-## Creating a Custom Image
+EXPOSE 4000
 
-It can be helpful to create your own Docker image if your app requires custom MySQL configuration. Adding extra layers atop the official MySQL base image gives you a ready-to-use image where you can omit manual injection of a MySQL config file.
-
-Here's an example `my.cnf` that changes some MySQL settings:
-```bash
-innodb-ft-enable-stopword = 0
-innodb-ft-min-token-size = 1
+CMD ["node", "app.js"]
 ```
 
-The MySQL image loads config files stored in the `/etc/mysql/conf.d` directory. Files will only be read when the MySQL server starts, which is when you start your Docker container. To get your config into your container, either use another Docker volume to bind mount your file, or use a `Dockerfile` to bake your changes into a new image:
-```bash
-Copy FROM mysql:8
-COPY my.cnf /etc/mysql/conf.d/my.cnf
+Lastly add this run script to the `package.json` file.
+```json
+"scripts": {
+
+"start": "node app.js"
+
+},
 ```
-Build your image:
+### Optional Nodemon Usage
+
+Using `Nodemon` enables the server auto restart when changes occur
+
+If you want to have the server restart every single time you make a change to the files in the backend then you can configure it to use `Nodemon`.
+
+All you have to do is update the `Dockerfile` and `package.json` file inside of the `api` folder.
+
+Update the code in the `Dockerfile` using the code below. We are now installing `Nodemon` at the start and using `dev` as the `run` command.
+
 ```bash
-docker build -t custom-mysql:latest .
+FROM node:16-alpine
+
+RUN npm install -g nodemon
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 4000
+
+CMD ["npm", "run", "dev"]
 ```
 
-Now you can run your image to start a MySQL instance that automatically uses your config file:
-```bash
-docker run --name custom-mysql -d \
-    -p 3306:3306 \
-    -e MYSQL_ROOT_PASSWORD=change-me \
-    -v mysql:/var/lib/mysql \
-    custom-mysql:latest
-```
-Since your custom image is based on the official Docker Hub version, you can use all the existing environment variables described above.
+Now update the `package.json` file with this `run` script for `Nodemon`.
+```json
+"scripts": {
 
+"start": "node app.js",
+
+"dev": "nodemon -L app.js"
+
+},
+```
+We just created a basic NodeJS Express app that runs on port 4000. That port is also mapped to 4000 in docker which lets us run it in a Docker container.
+
+## Frontend Part
+
+Now lets create a React frontend! Use your command line to get inside of the root folder for `my-app-docker`. Run the commands below to setup the project.
+```bash
+npx create-react-app client
+cd client
+touch .dockerignore Dockerfile
+```
+
+Add this line into the `.dockerignore` file.
+```bash
+node_modules
+```
+
+Put this code into the `Dockerfile` file.
+```bash
+FROM node:17-alpine
+
+WORKDIR /app
+
+COPY package.json .
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+## Assemble Backend and Frontend
+
+Finally update the `docker-compose.yml` in the root folder with the code below. We have added a `client` section at the bottom with settings for getting React running inside of a Docker container. Be careful with the yaml formatting otherwise you will get Docker errors when you try to run it.
+```yaml
+version: '3.8'
+services:
+  api:
+    build: ./api
+    container_name: api_backend
+    ports:
+      - '4000:4000'
+    volumes:
+      - ./api:/app
+      - ./app/node_modules
+  client:
+    build: ./client
+    container_name: client_frontend
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./client:/app
+      - ./app/node_modules
+    stdin_open: true
+    tty: true
+```
+
+Getting the React app to run inside of Docker requires you to be in the root folder where the `docker-compose.yml` file is. Now run the command below and it should run inside of a Docker container.
+```bash
+docker-compose up
+```
+If you go to http://localhost:3000 you should see the home route in your browser window.
+
+You can stop the server with the command below or you can go to the Docker app and stop the container from running.
+```bash
+docker-compose down
+```
+With this setup you can have a NodeJS backend and React frontend running at the same time inside of Docker! 
