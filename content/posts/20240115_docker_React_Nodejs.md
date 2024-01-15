@@ -29,10 +29,7 @@ cd api
 npm init -y
 npm i express
 touch app.js Dockerfile .dockerignore
-cd ..
-```
-We setup a backend called api and created some Docker file.
-
+cd ..https://github.com/supatechlead/docker-react-node/
 ## Backend Part
 
 Put this in the `docker-compose.yml` file. Be careful with the yaml formatting otherwise you will get Docker errors when you try to run it.
@@ -203,3 +200,7 @@ You can stop the server with the command below or you can go to the Docker app a
 docker-compose down
 ```
 With this setup you can have a NodeJS backend and React frontend running at the same time inside of Docker! 
+
+## Link
+
+Project is available at link https://github.com/supatechlead/docker-react-node/
