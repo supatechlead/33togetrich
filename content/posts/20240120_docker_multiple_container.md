@@ -14,6 +14,13 @@ tableOfContents = true
 
 To set up a Docker container with Nginx as a reverse proxy for multiple React.js application containers on the same server, follow these steps:
 
+## Create a Docker Network
+Create a Docker network so that all containers can communicate with each other. This will also make it easier to configure the reverse proxy.
+
+```bash
+docker network create network1
+```
+
 ## React Projects Creation
 
 First, we have to create the 2 react projects we want to access via the reverse proxy.
@@ -61,16 +68,8 @@ docker image build -t react-image-2 .
 ```
 Then, we can  start `app1` and `àpp2` containers with:
 ```bash
-docker run --name app1 react-image-1
-docker run --name app2 react-image-2
-```
-
-
-## Create a Docker Network
-Create a Docker network so that all containers can communicate with each other. This will also make it easier to configure the reverse proxy.
-
-```bash
-docker network create network1
+docker run --name app1 --network network1 -d react-image-1
+docker run --name app2 --network network1 -d react-image-2
 ```
 
 ## Configure Nginx as Reverse Proxy:
@@ -78,27 +77,33 @@ docker network create network1
 Create an Nginx configuration file defining proxy rules for each React application. Here is the `nginx.conf`, configuration file:
 
 ```bash
-server {
-    listen 80;
-    server_name localhost
+events {
+    worker_connections 1024;  # ajustez selon vos besoins
+}
 
-    location /app1 {
-        proxy_pass http://app1:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+http {
+    server {
+        listen 80;
+        server_name localhost;
+
+        location /app1 {
+            proxy_pass http://app1:3000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /app2 {
+            proxy_pass http://app2:3000;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        # Add more configurations for each React.js application
     }
-
-    location /app2 {
-        proxy_pass http://app2:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # Add more configurations for each React.js application
 }
 ```
 We also need a `mime.types` file that contains:
@@ -171,10 +176,10 @@ Start the `Nginx` container by mounting the custom configuration file inside the
 
 ```bash
 docker run -p 80:80 \
---network my_network \
+--network network1 \
 -v "$(pwd)"/nginx/nginx.conf:/etc/nginx/nginx.conf \
 -v "$(pwd)"/nginx/mime.types:/etc/nginx/mime.types \
-nginx:latest
+-d nginx:latest
 ```
 
 ## Test Your Configuration:
