@@ -1,6 +1,6 @@
 +++ 
 draft = false
-date = 2024-01-15T14:37:18+01:00
+date = 2024-01-20T14:37:18+01:00
 title = "Nginx Reverse Proxy for Multiple React Apps"
 description = "How to Dockerize Multiple React Apps on the Same Server"
 slug = ""
