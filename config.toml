@@ -1,5 +1,5 @@
 baseurl = "https://33togetrich.netlify.app"
-title = "devopsjaz"
+title = "33togetrich"
 theme = "hugo-coder"
 languagecode = "en"
 defaultcontentlanguage = "en"
@@ -10,11 +10,11 @@ paginate = 4
 noClasses = false
 
 [params]
-author = "devopsjaz"
+author = "33togetrich"
 # license = '<a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA-4.0</a>'
-description = "My personal devops tricks"
+description = "33 Projects till I get Rich"
 keywords = "blog,developer,personal"
-info = ["Full Stack DevOps", "Magician"]
+info = ["Wealth", "Money", "Millions", "Billions"]
 avatarURL = "images/avatar.jpg"
 #gravatar = "john.doe@example.com"
 dateFormat = "January 2, 2006"
@@ -125,51 +125,51 @@ series = "series"
 tag = "tags"
 author = "authors"
 
-[[params.social]]
-name = "Github"
-icon = "fa fa-2x fa-github"
-weight = 1
-url = "https://github.com/johndoe/"
+#[[params.social]]
+#name = "Github"
+#icon = "fa fa-2x fa-github"
+#weight = 1
+#url = "https://github.com/johndoe/"
 
-[[params.social]]
-name = "Gitlab"
-icon = "fa fa-2x fa-gitlab"
-weight = 2
-url = "https://gitlab.com/johndoe/"
+#[[params.social]]
+#name = "Gitlab"
+#icon = "fa fa-2x fa-gitlab"
+#weight = 2
+#url = "https://gitlab.com/johndoe/"
 
-[[params.social]]
-name = "Twitter"
-icon = "fa fa-2x fa-twitter"
-weight = 3
-url = "https://twitter.com/johndoe/"
+#[[params.social]]
+#name = "Twitter"
+#icon = "fa fa-2x fa-twitter"
+#weight = 3
+#url = "https://twitter.com/johndoe/"
 
-[[params.social]]
-name = "LinkedIn"
-icon = "fa fa-2x fa-linkedin"
-weight = 4
-url = "https://www.linkedin.com/in/johndoe/"
+#[[params.social]]
+#name = "LinkedIn"
+#icon = "fa fa-2x fa-linkedin"
+#weight = 4
+#url = "https://www.linkedin.com/in/johndoe/"
 
-[[params.social]]
-name = "Medium"
-icon = "fa fa-2x fa-medium"
-weight = 5
-url = "https://medium.com/@johndoe"
+#[[params.social]]
+#name = "Medium"
+#icon = "fa fa-2x fa-medium"
+#weight = 5
+#url = "https://medium.com/@johndoe"
 
-[[params.social]]
-name = "RSS"
-icon = "fa fa-2x fa-rss"
-weight = 6
-url = "https://myhugosite.com/index.xml"
-rel = "alternate"
-type = "application/rss+xml"
+#[[params.social]]
+#name = "RSS"
+#icon = "fa fa-2x fa-rss"
+#weight = 6
+#url = "https://myhugosite.com/index.xml"
+#rel = "alternate"
+#type = "application/rss+xml"
 
 [languages.en]
 languageName = ":uk:"
 
-[[languages.en.menu.main]]
-name = "About"
-weight = 1
-url = "about/"
+#[[languages.en.menu.main]]
+#name = "About"
+#weight = 1
+#url = "about/"
 
 [[languages.en.menu.main]]
 name = "Blog"
