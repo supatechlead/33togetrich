@@ -16,6 +16,7 @@ tableOfContents = true
 ### Profile Collection
 
 ```plantuml
+@startuml
 participant participant as Foo
 actor       actor       as Foo1
 boundary    boundary    as Foo2
@@ -31,6 +32,7 @@ Foo -> Foo4 : To entity
 Foo -> Foo5 : To database
 Foo -> Foo6 : To collections
 Foo -> Foo7: To queue
+@enduml
 ```
 
 @startuml firstDiagram
