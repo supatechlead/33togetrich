@@ -15,6 +15,11 @@ tableOfContents = true
 
 ### Profile Collection
 
+{{< plantuml id="eg" >}}
+Alice -> Bob: test
+{{< /plantuml >}}
+
+
 ```plantuml
 @startuml
 participant participant as Foo
