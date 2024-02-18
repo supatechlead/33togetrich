@@ -15,6 +15,12 @@ tableOfContents = true
 
 ### Profile Collection
 
+{{< plantuml >}}
+@startuml
+Bob -> Alice : Hello
+@enduml
+{{< /plantuml >}}
+
 > Profile
 ```
 Document_id
