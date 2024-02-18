@@ -33,6 +33,14 @@ Foo -> Foo6 : To collections
 Foo -> Foo7: To queue
 ```
 
+@startuml firstDiagram
+
+Alice -> Bob: Hello
+Bob -> Alice: Hi!
+
+@enduml
+
+
 > Profile
 ```
 Document_id
